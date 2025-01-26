@@ -1,4 +1,9 @@
-// Firebase Config
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCf6tLw7fZqUQV4ynMRMRdkedNIjkPelII",
   authDomain: "lets-go-gambling.firebaseapp.com",
@@ -6,96 +11,77 @@ const firebaseConfig = {
   storageBucket: "lets-go-gambling.appspot.com",
   messagingSenderId: "742916336208",
   appId: "1:742916336208:web:406296fe1405e424a07f55",
-  measurementId: "G-SL3WX5TN6D"
+  measurementId: "G-SL3WX5TN6D"  // Can be removed if not using analytics
 };
 
 // Initialize Firebase
-// Ensure the script is being treated as a module
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
-
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-console.log("Firebase Analytics initialized");
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// DOM Elements
-const loginDiv = document.getElementById("login");
-const signupDiv = document.getElementById("signup");
-const dashboardDiv = document.getElementById("dashboard");
-const userEmailSpan = document.getElementById("userEmail");
-const userBalanceSpan = document.getElementById("userBalance");
-
+// Sign Up Function
 document.getElementById("signupBtn").addEventListener("click", async () => {
-    const email = document.getElementById("signupEmail").value;
-    const password = document.getElementById("signupPassword").value;
+    const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value.trim();
+
+    if (!email || !password) {
+        alert("Please enter valid email and password");
+        return;
+    }
+
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await setDoc(doc(db, "users", user.uid), { balance: 1000 });
-        alert("Sign up successful! You received 1000 fake credits.");
-        showDashboard(user);
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+            email: email,
+            credits: 1000  // Give users some starting fake credits
+        });
+        alert("Sign-up successful! Welcome " + email);
     } catch (error) {
         alert("Error signing up: " + error.message);
     }
 });
 
+// Login Function
 document.getElementById("loginBtn").addEventListener("click", async () => {
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        showDashboard(user);
+        const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+        alert("Welcome back, " + userDoc.data().email + "! You have " + userDoc.data().credits + " credits.");
     } catch (error) {
         alert("Error logging in: " + error.message);
     }
 });
 
+// Logout Function
 document.getElementById("logoutBtn").addEventListener("click", async () => {
-    await signOut(auth);
-    showAuth();
-});
-
-document.getElementById("redeemCodeBtn").addEventListener("click", async () => {
-    const code = prompt("Enter a promo code:");
-    if (code === "FREECREDIT") {
-        const user = auth.currentUser;
-        const userDoc = doc(db, "users", user.uid);
-        await updateDoc(userDoc, { balance: increment(500) });
-        alert("500 credits added to your balance!");
-        loadUserBalance(user);
-    } else {
-        alert("Invalid promo code.");
+    try {
+        await signOut(auth);
+        alert("You have been logged out.");
+    } catch (error) {
+        alert("Error logging out: " + error.message);
     }
 });
 
-async function showDashboard(user) {
-    loginDiv.style.display = "none";
-    signupDiv.style.display = "none";
-    dashboardDiv.style.display = "block";
-    userEmailSpan.textContent = user.email;
-    loadUserBalance(user);
-}
+// Redeem Code Function (Example Code)
+document.getElementById("redeemBtn").addEventListener("click", async () => {
+    const code = document.getElementById("redeemCode").value.trim();
+    const user = auth.currentUser;
 
-async function showAuth() {
-    loginDiv.style.display = "block";
-    signupDiv.style.display = "block";
-    dashboardDiv.style.display = "none";
-}
-
-async function loadUserBalance(user) {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-        userBalanceSpan.textContent = userDoc.data().balance;
+    if (!user) {
+        alert("You need to be logged in to redeem a code.");
+        return;
     }
-}
 
-auth.onAuthStateChanged(user => {
-    if (user) {
-        showDashboard(user);
-    } else {
-        showAuth();
+    try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+            credits: increment(500)  // Add 500 credits for example
+        });
+        alert("Redeem successful! +500 credits added.");
+    } catch (error) {
+        alert("Error redeeming code: " + error.message);
     }
 });
-
