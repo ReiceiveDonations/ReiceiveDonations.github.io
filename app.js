@@ -16,6 +16,7 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https:/
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
 // DOM Elements
