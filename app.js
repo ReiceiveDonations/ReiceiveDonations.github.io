@@ -3,7 +3,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyCf6tLw7fZqUQV4ynMRMRdkedNIjkPelII",
     authDomain: "lets-go-gambling.firebaseapp.com",
     projectId: "lets-go-gambling",
-    storageBucket: "lets-go-gambling.firebasestorage.app",
+    storageBucket: "lets-go-gambling.appspot.com",
     messagingSenderId: "742916336208",
     appId: "1:742916336208:web:406296fe1405e424a07f55"
 };
