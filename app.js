@@ -1,11 +1,12 @@
 // Firebase Config
 const firebaseConfig = {
-    apiKey: "AIzaSyCf6tLw7fZqUQV4ynMRMRdkedNIjkPelII",
-    authDomain: "lets-go-gambling.firebaseapp.com",
-    projectId: "lets-go-gambling",
-    storageBucket: "lets-go-gambling.appspot.com",
-    messagingSenderId: "742916336208",
-    appId: "1:742916336208:web:406296fe1405e424a07f55"
+  apiKey: "AIzaSyCf6tLw7fZqUQV4ynMRMRdkedNIjkPelII",
+  authDomain: "lets-go-gambling.firebaseapp.com",
+  projectId: "lets-go-gambling",
+  storageBucket: "lets-go-gambling.appspot.com",
+  messagingSenderId: "742916336208",
+  appId: "1:742916336208:web:406296fe1405e424a07f55",
+  measurementId: "G-SL3WX5TN6D"
 };
 
 // Initialize Firebase
@@ -15,9 +16,8 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const analytics = getAnalytics(app);
-const db = getFirestore(app);
+console.log("Firebase Analytics initialized");
 
 // DOM Elements
 const loginDiv = document.getElementById("login");
